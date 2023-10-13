@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@satorijs/adapter-discord": "^4.1.0",
+    "@satorijs/adapter-satori": "^1.0.0",
+    "@satorijs/satori": "^3.0.0-rc.0",
+    "node-fetch": "^3.3.2",
+    "querystring": "^0.2.1",
+    "random": "^4.1.0",
+    "striptags": "^3.2.0",
+    "ws": "^8.14.2"
+  },
+  "type": "module"
+}
