@@ -4,6 +4,7 @@ import WebSocket from 'ws';
 
 import Wordpress from './lib/wordpress.js';
 import QQ from './lib/qq.js';
+import Hpp from './lib/hpp.js';
 import Common from './lib/common.js';
 
 const configFile = fs.readFileSync('./config.json', 'utf-8');
@@ -76,8 +77,12 @@ ws.on('message', async function message(data) {
       _itemRecord(senderId, userId, messageContent);
       break;
 
-      case 'deleteItem':
-      _deleteItem(senderId, userId, messageContent);
+      case 'hppBattle':
+      _hppBattle(senderId, messageContent);
+      break;
+
+      case 'hppStatus':
+      _hppStatus(senderId, messageContent);
       break;
     }
   }
@@ -332,6 +337,24 @@ async function _deleteItem(senderId, userId, messageContent){
     content = '找不到此道具，無法刪除';
   }
   await QQ.sendMessage(senderId, content, config);
+}
+
+async function _hppBattle(senderId, messageContent){
+  const battleRegax = /^(\/battle) ([\s\S]*) ([\s\S]*) ([\s\S]*)$/;
+  const chara1 = battleRegax.exec(messageContent)[2];
+  const chara2 = battleRegax.exec(messageContent)[3];
+  const magic = battleRegax.exec(messageContent)[4]
+  const battleResult = await Hpp.getBattleResult(config, chara1, chara2, magic);
+  let content = `${chara1} 使用咒語 ${magic} 攻击${chara2}，实际命中率${battleResult["实际命中率"]}，实际暴击率${battleResult["实际暴击率"]}，实际伤害值${battleResult["实际伤害值"]}`;
+  const result = await QQ.sendMessage(senderId, content, config);
+}
+
+async function _hppStatus(senderId, messageContent){
+  const statusRegax = /^(\/status) ([\s\S]*)$/;
+  const charaName = statusRegax.exec(messageContent)[2];
+  const status = await Hpp.getStatus(config, charaName);
+  let content = `${charaName}数值： HP ${status.HP}， 攻击 ${status["攻擊"]}，防禦 ${status["防禦"]}，速度 ${status["速度"]}`;
+  const result = await QQ.sendMessage(senderId, content, config);
 }
 
 /* 连接建立后，每隔 10s 向 SDK 发送一次 PING 信令；

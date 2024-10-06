@@ -1,5 +1,6 @@
 {
   "wordpressUrl":"",
+  "hppApiUrl":"",
   "satoriUrl":"",
   "satoriToken:""
 }

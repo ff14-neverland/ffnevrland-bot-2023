@@ -11,11 +11,6 @@
       "type": "九宫幻卡"
     },
     {
-      "name": "兔兔族",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
       "name": "鲶鱼精",
       "number": "5",
       "type": "九宫幻卡"
@@ -51,57 +46,57 @@
       "type": "九宫幻卡"
     },
     {
-      "name": "宇宙碎片x2",
+      "name": "异亚",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "纹章碎片x2",
       "number": "4",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x3",
+      "name": "纹章碎片x3",
       "number": "4",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x4",
+      "name": "纹章碎片x4",
       "number": "4",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x5",
+      "name": "纹章碎片x5",
       "number": "4",
       "type": "道具"
     },
     {
-      "name": "迷你Clear(Elpis)",
+      "name": "归位星仪",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "基础型神兵-报丧女妖",
+      "name": "迷你颂诗乐团",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "小型游星号",
+      "name": "浮梦盏",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "迷你便利店&守月女士",
+      "name": "小小大神巫",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "迷你尤格尔(Elpis)",
+      "name": "小狗成双",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "迷你琳塔",
-      "number": "5",
-      "type": "寵物"
-    },
-    {
-      "name": "迷你疫医(Elpis)",
+      "name": "迷你半身",
       "number": "5",
       "type": "寵物"
     }
