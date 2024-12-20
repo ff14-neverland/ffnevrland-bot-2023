@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
-import WebSocket from 'ws';
+import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
 
 import Wordpress from './lib/wordpress.js';
 import QQ from './lib/qq.js';
@@ -9,81 +9,73 @@ import Common from './lib/common.js';
 const configFile = fs.readFileSync('./config.json', 'utf-8');
 const config = JSON.parse(configFile);
 
-//參考 https://satori.js.org/zh-CN/protocol/events.html 建立Websocket 接收指令
-const ws = new WebSocket(`ws://${config.satoriUrl}/v1/events`);
-
-ws.on('error', console.error);
-
-/* 连接建立后，在 10s 内发送一个 IDENTIFY 信令，用于鉴权和恢复会话；
-SDK 收到后会回复一个 READY 信令，并开启事件推送；
-*/
-ws.on('open', function open() {
-  const token = JSON.stringify({
-    'op': 3,
-    'body':{
-      'token': config.satoriToken,
-    }
-  }
-);
-ws.send(token);
-});
-
-ws.on('message', async function message(data) {
-  console.log('received: %s', data);
-  const jsonData = JSON.parse(data);
-  //假如接收到的事件為Message，讀取內容
-  if(jsonData.body && jsonData.body.channel && jsonData.body.channel.type === 0){
-    const dataBody = jsonData.body;
-    const userId = dataBody.user.id;
-    const senderId = dataBody.channel.id;
-    const messageContent = dataBody.message.content;
-    const command = QQ.readCommand(messageContent);
-
-    switch(command){
+const app = new Koa();
+app.use(bodyParser());
+app.use(async ctx => {
+  const qqMessage = ctx.request.body;
+  console.log(ctx.request.body);
+  if(qqMessage){
+      const messageContent = ctx.request.body.raw_message;
+      const command = QQ.readCommand(messageContent);
+      const messageType = ctx.request.body.message_type;
+      const userId = ctx.request.body.user_id;
+      let senderId = userId;
+      //如果發送者為群，將senderId設為group_id
+      if(ctx.request.body.group_id){
+          senderId = ctx.request.body.group_id;
+      }
+      switch(command){
       case 'latest':
-      _getLatest(senderId);
+        _getLatest(senderId);
       break;
 
       case 'help':
-      _getHelp(senderId);
+        _getHelp(senderId);
       break;
 
       case 'count':
-      _getCount(senderId, userId, messageContent);
+        _getCount(senderId, userId, messageContent);
       break;
 
       case 'who':
-      _getWho(senderId, messageContent);
+        _getWho(senderId, messageContent);
       break;
 
       case 'roll':
-      _roll(senderId, messageContent);
+        _roll(senderId, messageContent);
       break;
 
       case 'items':
-      _getItems(senderId, userId, messageContent);
+        _getItems(senderId, userId, messageContent);
       break;
 
       case 'choose':
-      _choose(senderId, messageContent);
+        _choose(senderId, messageContent);
+      break;
+
+      case 'admin':
+        _admin(senderId, userId, messageContent);
       break;
 
       case 'draw':
-      _draw(senderId, userId, messageContent);
+        _draw(senderId, userId, messageContent);
       break;
 
       case 'itemRecord':
-      _itemRecord(senderId, userId, messageContent);
-      break;
+        _itemRecord(senderId, userId, messageContent);
 
       case 'deleteItem':
-      _deleteItem(senderId, userId, messageContent);
-      break;
+       _deleteItem(senderId, userId, messageContent);
     }
+  }else{
+      ctx.body = 'Please provide QQ message.';
   }
 });
 
-async function _getLatest(senderId, messageType){
+console.log('Start at 2000 port.');
+app.listen(2000);
+
+async function _getLatest(senderId){
   const articles = await Wordpress.fetchLatest(5, config);
   let content = '以下是最新5篇文章：';
   for(let i = 0; i < articles.length; i++){
@@ -168,6 +160,7 @@ async function _getWho(senderId, messageContent){
 
 async function _roll(senderId, messageContent){
   const rollRegax = /(\/roll) ([0-9]+)d([0-9]+)/;
+  console.log(messageContent);
   const diceNumber = parseInt(rollRegax.exec(messageContent)[2]);
   const rollNumber = parseInt(rollRegax.exec(messageContent)[3]);
   const rollResult = Common.rollDice(diceNumber, rollNumber).toString();
@@ -333,16 +326,3 @@ async function _deleteItem(senderId, userId, messageContent){
   }
   await QQ.sendMessage(senderId, content, config);
 }
-
-/* 连接建立后，每隔 10s 向 SDK 发送一次 PING 信令；
-SDK 收到后会回复一个 PONG 信令；
-*/
-
-function sendPong(){
-  const ping = JSON.stringify({
-    'op': 1,
-  });
-  ws.send(ping);
-}
-
-setInterval(sendPong, 10000);
