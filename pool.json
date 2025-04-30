@@ -1,47 +1,17 @@
 {
   "items":[
     {
-      "name": "矮人",
+      "name": "阿马罗",
       "number": "5",
       "type": "九宫幻卡"
     },
     {
-      "name": "苔小妖",
+      "name": "巨人掌",
       "number": "5",
       "type": "九宫幻卡"
     },
     {
-      "name": "兔兔族",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "鲶鱼精",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "莫古力",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "精金龟",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "芬里尔",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "神龙",
-      "number": "5",
-      "type": "九宫幻卡"
-    },
-    {
-      "name": "兔兔族",
+      "name": "琴风",
       "number": "5",
       "type": "九宫幻卡"
     },
@@ -51,57 +21,77 @@
       "type": "九宫幻卡"
     },
     {
-      "name": "宇宙碎片x2",
-      "number": "4",
+      "name": "水妖",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "其日娜",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "纱都",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "可露儿·巴尔德西昂",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "吉吉",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "奥猴",
+      "number": "5",
+      "type": "九宫幻卡"
+    },
+    {
+      "name": "凯尔特碎片x2",
+      "number": "5",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x3",
-      "number": "4",
+      "name": "凯尔特碎片x3",
+      "number": "5",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x4",
-      "number": "4",
+      "name": "凯尔特碎片x4",
+      "number": "5",
       "type": "道具"
     },
     {
-      "name": "宇宙碎片x5",
-      "number": "4",
+      "name": "凯尔特碎片x5",
+      "number": "5",
       "type": "道具"
     },
     {
-      "name": "迷你Clear(Elpis)",
+      "name": "迷你水精灵",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "基础型神兵-报丧女妖",
+      "name": "机关硫磺蜘蛛",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "小型游星号",
+      "name": "喷射快乐水",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "迷你便利店&守月女士",
+      "name": "袖珍光之剑",
       "number": "5",
       "type": "寵物"
     },
     {
-      "name": "迷你尤格尔(Elpis)",
-      "number": "5",
-      "type": "寵物"
-    },
-    {
-      "name": "迷你琳塔",
-      "number": "5",
-      "type": "寵物"
-    },
-    {
-      "name": "迷你疫医(Elpis)",
+      "name": "茉莉安&锁孔机械人偶背包",
       "number": "5",
       "type": "寵物"
     }
