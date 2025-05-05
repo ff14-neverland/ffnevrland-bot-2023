@@ -2,8 +2,8 @@ import fs from 'fs';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 
-import Wordpress from './lib/wordpress.js';
 import QQ from './lib/qq.js';
+import Database from './lib/database.js';
 import Common from './lib/common.js';
 
 const configFile = fs.readFileSync('./config.json', 'utf-8');
@@ -29,11 +29,13 @@ app.use(async ctx => {
         _getHelp(senderId);
       break;
 
+      case 'at':
+        _getChara(senderId, messageContent);
+      break;
 
       case 'roll':
         _roll(senderId, messageContent);
       break;
-
 
       case 'choose':
         _choose(senderId, messageContent);
@@ -49,9 +51,36 @@ app.listen(2000);
 
 async function _getHelp(senderId){
   let content = '目前指令：';
+  content += '\n /at (角色名稱) 输出角色技能组、随身携带宝可梦、道具';
   content += '\n /roll (骰子數量)d(骰子面數) 擲骰功能。範例：1顆100面的骰子= 1d100';
   content += '\n /choose (選項) 睡鼠老師，幫我選擇！格式範例：選項1|選項2。建議小窗使用。';
   const result = await QQ.sendMessage(senderId, content, config);
+  console.log(result);
+}
+
+async function _getChara(senderId, messageContent){
+  const atRegax = /^(\/at) ([\s\S]*)$/;
+  const name = atRegax.exec(messageContent)[2];
+  const chara = await Database.fetchChara(name);
+  let content = '';
+  if(chara){
+    content = '角色' + chara['name'] + '目前狀態：';
+    if(chara['skill']){
+      content += '\n技能组：' + chara['skill'];
+    }
+    if(chara['pokemon']){
+      content += '\n寶可夢：'+ chara['pokemon'];
+    }
+    content += '\n道具：';
+    const items = JSON.parse(chara['items']);
+    for(let i = 0; i < items.length; i++){
+      const item = items[i];
+      content += `\n${item['name']}: ${item['number']}個 品質：${item['quality']}`;
+    }
+  }else{
+    content = '目前沒有該角色的資料！';
+  }
+  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
 }
 
