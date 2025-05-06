@@ -33,6 +33,10 @@ app.use(async ctx => {
         _getChara(senderId, messageContent);
       break;
 
+      case 'bag':
+        _getBag(senderId, messageContent);
+      break;
+
       case 'roll':
         _roll(senderId, messageContent);
       break;
@@ -79,6 +83,37 @@ async function _getChara(senderId, messageContent){
     }
   }else{
     content = '目前沒有該角色的資料！';
+  }
+  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+  console.log(result);
+}
+
+async function _getBag(senderId, messageContent){
+  const bagRegax = /^(\/bag) ([\s\S]*) ([\s\S]*)$/;
+  const teamName = bagRegax.exec(messageContent)[2];
+  const target = bagRegax.exec(messageContent)[3];
+  const team = await Database.fetchBag(teamName);
+  let content = '';
+  if(team){
+    content = '小隊' + team['name'] + '倉庫狀態：';
+    if(target === "道具"){
+      content += '\n道具：';
+      const items = JSON.parse(team['items']);
+      for(let i = 0; i < items.length; i++){
+        const item = items[i];
+        content += `\n${item['name']}: ${item['number']}   品質：${item['quality']}`;
+      }
+    }
+    if(target === "素材"){
+      content += '\n素材：';
+      const materials = JSON.parse(team['materials']);
+      for(let i = 0; i < materials.length; i++){
+        const material = materials[i];
+        content += `\n${material['name']}: ${material['number']}`;
+      }
+    }
+  }else{
+    content = '目前沒有該小隊的資料！';
   }
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
