@@ -37,6 +37,10 @@ app.use(async ctx => {
         _getBag(senderId, messageContent);
       break;
 
+      case 'pf':
+        _getFormula(senderId, messageContent);
+      break;
+
       case 'roll':
         _roll(senderId, messageContent);
       break;
@@ -79,7 +83,7 @@ async function _getChara(senderId, messageContent){
     const items = JSON.parse(chara['items']);
     for(let i = 0; i < items.length; i++){
       const item = items[i];
-      content += `\n${item['name']}: ${item['number']}個 品質：${item['quality']}`;
+      content += `\n ${item['number']} ${item['name']} 品質${item['quality']} 使用次數${item['frequency']} ${item['type']}`;
     }
   }else{
     content = '目前沒有該角色的資料！';
@@ -101,7 +105,7 @@ async function _getBag(senderId, messageContent){
       const items = JSON.parse(team['items']);
       for(let i = 0; i < items.length; i++){
         const item = items[i];
-        content += `\n${item['name']}: ${item['number']}   品質：${item['quality']}`;
+        content += `\n ${item['number']} ${item['name']} 品質${item['quality']} 使用次數${item['frequency']} ${item['type']}`;
       }
     }
     if(target === "素材"){
@@ -109,11 +113,28 @@ async function _getBag(senderId, messageContent){
       const materials = JSON.parse(team['materials']);
       for(let i = 0; i < materials.length; i++){
         const material = materials[i];
-        content += `\n${material['name']}: ${material['number']}`;
+        content += `\n ${material['number']} ${material['name']} ${material['color']} ${material['type']}`;
       }
     }
   }else{
     content = '目前沒有該小隊的資料！';
+  }
+  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+  console.log(result);
+}
+
+async function _getFormula(senderId, messageContent){
+  const formulaRegax = /^(\/pf) ([\s\S]*)$/;
+  const itemName = formulaRegax.exec(messageContent)[2];
+  let formula = await Database.fetchFormula(itemName);
+  formula = formula.formula;
+  console.log(formula);
+
+  let content = '';
+  if(formula){
+    content = `${itemName}的配方為： ${formula}`;
+  }else{
+    content = '目前沒有該配方的資料！';
   }
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
