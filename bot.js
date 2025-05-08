@@ -45,6 +45,10 @@ app.use(async ctx => {
         _roll(senderId, messageContent);
       break;
 
+      case 'cj':
+        _collect(senderId, messageContent);
+      break;
+
       case 'choose':
         _choose(senderId, messageContent);
       break;
@@ -123,12 +127,83 @@ async function _getBag(senderId, messageContent){
   console.log(result);
 }
 
+async function _collect(senderId, messageContent){
+  const cjRegax1 = /^(\/cj) ([a-zA-Z]) ([0-9]+)$/;
+  const cjRegax2 = /^(\/cj) ([^0-9]) ([\u4e00-\u9fa5]*) ([0-9]+)$/;
+  const totals = [];
+  let content = ``;
+
+  if(messageContent.match(cjRegax1)){
+    const teamName = cjRegax1.exec(messageContent)[2];
+    const team = await Database.fetchTeam(teamName);
+
+    const collectNumber = parseInt(cjRegax1.exec(messageContent)[3]);
+    let pool = await Database.collectItem();
+    const drawResults = Common.drawTarget(pool, collectNumber);
+
+    console.log(drawResults);
+    
+    content = `【${team.full_name}】`;
+
+    for(let i = 0; i < drawResults.length; i++){
+      const drawResult = drawResults[i];
+      const resultIndex = totals.findIndex(function(item){
+        const itemKey = Object.keys(item)[0];
+        return itemKey === drawResult.name;
+      });
+      //If the item is not counted
+      if(resultIndex === -1){
+        const total = {}
+        total[drawResult.name] = 1;
+        totals.push(total);
+      }else{
+        totals[resultIndex][drawResult.name] += 1;
+      }
+    }
+  }
+
+  if(messageContent.match(cjRegax2)){
+    const teamName = cjRegax2.exec(messageContent)[2];
+    const team = await Database.fetchTeam(teamName);
+
+    const collectType = cjRegax2.exec(messageContent)[3];
+    const collectNumber = cjRegax2.exec(messageContent)[4];
+    let pool = await Database.collectItem(collectType);
+    const drawResults = Common.drawTarget(pool, collectNumber);
+
+    content = `【${team.full_name}】`;
+
+    for(let i = 0; i < drawResults.length; i++){
+      const drawResult = drawResults[i];
+      const resultIndex = totals.findIndex(function(item){
+        const itemKey = Object.keys(item)[0];
+        return itemKey === drawResult.name;
+      });
+      //If the item is not counted
+      if(resultIndex === -1){
+        const total = {}
+        total[drawResult.name] = 1;
+        totals.push(total);
+      }else{
+        totals[resultIndex][drawResult.name] += 1;
+      }
+    }
+  }
+
+  for(let i = 0; i < totals.length; i++){
+    const item = totals[i];
+    const itemName = Object.keys(item)[0];
+    content += `${itemName}${item[itemName]} `;
+  }
+  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+  console.log(result);
+}
+
 async function _getFormula(senderId, messageContent){
   const formulaRegax = /^(\/pf) ([\s\S]*)$/;
   const itemName = formulaRegax.exec(messageContent)[2];
   let formula = await Database.fetchFormula(itemName);
   formula = formula.formula;
-  console.log(formula);
 
   let content = '';
   if(formula){
