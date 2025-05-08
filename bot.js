@@ -140,24 +140,24 @@ async function _collect(senderId, messageContent){
     const collectNumber = parseInt(cjRegax1.exec(messageContent)[3]);
     let pool = await Database.collectItem();
     const drawResults = Common.drawTarget(pool, collectNumber);
-
-    console.log(drawResults);
     
     content = `【${team.full_name}】`;
 
     for(let i = 0; i < drawResults.length; i++){
       const drawResult = drawResults[i];
       const resultIndex = totals.findIndex(function(item){
-        const itemKey = Object.keys(item)[0];
-        return itemKey === drawResult.name;
+        return item.id === drawResult.id;
       });
       //If the item is not counted
       if(resultIndex === -1){
-        const total = {}
-        total[drawResult.name] = 1;
+        const total = {
+          id: drawResult.id,
+          name: drawResult.name,
+          number: 1,
+        }
         totals.push(total);
       }else{
-        totals[resultIndex][drawResult.name] += 1;
+        totals[resultIndex].number += 1;
       }
     }
   }
@@ -176,24 +176,24 @@ async function _collect(senderId, messageContent){
     for(let i = 0; i < drawResults.length; i++){
       const drawResult = drawResults[i];
       const resultIndex = totals.findIndex(function(item){
-        const itemKey = Object.keys(item)[0];
-        return itemKey === drawResult.name;
+        return item.id === drawResult.id;
       });
       //If the item is not counted
       if(resultIndex === -1){
-        const total = {}
-        total[drawResult.name] = 1;
+        const total = {
+          id: drawResult.id,
+          name: drawResult.name,
+          number: 1,
+        }
         totals.push(total);
       }else{
-        totals[resultIndex][drawResult.name] += 1;
+        totals[resultIndex].number += 1;
       }
     }
   }
-
   for(let i = 0; i < totals.length; i++){
     const item = totals[i];
-    const itemName = Object.keys(item)[0];
-    content += `${itemName}${item[itemName]} `;
+    content += `${item.name}${item.number} `;
   }
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
