@@ -40,6 +40,10 @@ app.use(async ctx => {
       case 'pf':
         _getFormula(senderId, messageContent);
       break;
+      
+      case 'lj':
+        _addItem(senderId, messageContent);
+      break;
 
       case 'roll':
         _roll(senderId, messageContent);
@@ -229,6 +233,27 @@ async function _getFormula(senderId, messageContent){
   }else{
     content = '目前沒有該配方的資料！';
   }
+  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+  console.log(result);
+}
+
+async function _addItem(senderId, messageContent){
+  const ljRegax = /^(\/lj) ([a-zA-Z]) ([\u4e00-\u9fa5]*)([a-zA-Z])$/;
+
+  const teamName = ljRegax.exec(messageContent)[2];
+  const team = await Database.fetchTeam(teamName);
+
+  const itemName = ljRegax.exec(messageContent)[3];
+  const itemQuality = ljRegax.exec(messageContent)[4];
+  const item = await Database.fetchItem(itemName);
+  
+  await Database.updateTeamItem(team.id, {
+    id: item.id,
+    quality: itemQuality.toUpperCase(),
+  });
+
+  let content = '';
+  content = `已新增品質${itemQuality}的${itemName}至${teamName}小隊倉庫。`;
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
 }
