@@ -68,6 +68,11 @@ app.listen(2000);
 async function _getHelp(senderId){
   let content = '目前指令：';
   content += '\n /at (角色名稱) 输出角色技能组、随身携带宝可梦、道具';
+  content += '\n /bag (小组编号) (道具/素材) 查询小组仓库。範例：/bag A 道具';
+  content += '\n /pf (道具名稱) 查询并输出该道具的配方。範例：/pf 冰晶';
+  content += '\n /cj (小组编号) (采集數量) 采集指定數量的素材。範例：/cj C 5';
+  content += '\n /cj (小组编号) (类型) (采集數量) 采集指定類型和數量的素材。範例：/cj C 植物 5';
+  content += '\n /lj (小组编号) (道具)(品質) 調合指定品質的道具。範例：/lj C 冰晶b';
   content += '\n /roll (骰子數量)d(骰子面數) 擲骰功能。範例：1顆100面的骰子= 1d100';
   content += '\n /choose (選項) 睡鼠老師，幫我選擇！格式範例：選項1|選項2。建議小窗使用。';
   const result = await QQ.sendMessage(senderId, content, config);
@@ -102,7 +107,7 @@ async function _getChara(senderId, messageContent){
 
 async function _getBag(senderId, messageContent){
   const bagRegax = /^(\/bag) ([\s\S]*) ([\s\S]*)$/;
-  const teamName = bagRegax.exec(messageContent)[2];
+  const teamName = (bagRegax.exec(messageContent)[2]).toUpperCase();
   const target = bagRegax.exec(messageContent)[3];
 
   const team = await Database.fetchBag(teamName);
@@ -151,7 +156,7 @@ async function _collect(senderId, messageContent){
   let content = ``;
 
   if(messageContent.match(cjRegax1)){
-    const teamName = cjRegax1.exec(messageContent)[2];
+    const teamName = (cjRegax1.exec(messageContent)[2]).toUpperCase();
     const team = await Database.fetchTeam(teamName);
 
     const collectNumber = parseInt(cjRegax1.exec(messageContent)[3]);
@@ -182,7 +187,7 @@ async function _collect(senderId, messageContent){
   }
 
   if(messageContent.match(cjRegax2)){
-    const teamName = cjRegax2.exec(messageContent)[2];
+    const teamName = (cjRegax2.exec(messageContent)[2]).toUpperCase();
     const team = await Database.fetchTeam(teamName);
 
     const collectType = cjRegax2.exec(messageContent)[3];
@@ -240,12 +245,13 @@ async function _getFormula(senderId, messageContent){
 async function _addItem(senderId, messageContent){
   const ljRegax = /^(\/lj) ([a-zA-Z]) ([\u4e00-\u9fa5]*)([a-zA-Z])$/;
 
-  const teamName = ljRegax.exec(messageContent)[2];
+  const teamName = (ljRegax.exec(messageContent)[2]).toUpperCase();
   const team = await Database.fetchTeam(teamName);
 
   const itemName = ljRegax.exec(messageContent)[3];
   const itemQuality = ljRegax.exec(messageContent)[4];
   const item = await Database.fetchItem(itemName);
+  
   
   await Database.updateTeamItem(team.id, {
     id: item.id,
