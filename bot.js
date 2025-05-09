@@ -173,6 +173,8 @@ async function _collect(senderId, messageContent){
         totals[resultIndex].number += 1;
       }
     }
+    //Update database
+    Database.updateTeamMaterial(team.id, totals);
   }
 
   if(messageContent.match(cjRegax2)){
@@ -203,12 +205,14 @@ async function _collect(senderId, messageContent){
         totals[resultIndex].number += 1;
       }
     }
+      //Update database
+      Database.updateTeamMaterial(team.id, totals);
   }
   for(let i = 0; i < totals.length; i++){
     const item = totals[i];
     content += `${item.name}${item.number} `;
   }
-  console.log(JSON.stringify(totals));
+  
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
 }
