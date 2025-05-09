@@ -87,7 +87,7 @@ async function _getChara(senderId, messageContent){
     const items = JSON.parse(chara['items']);
     for(let i = 0; i < items.length; i++){
       const item = items[i];
-      content += `\n ${item['number']} ${item['name']} 品質${item['quality']} 使用次數${item['frequency']} ${item['type']}`;
+      content += `\n ${item.name}（${item.quality}，使用次数${item.frequency}，${item.type}）`;
     }
   }else{
     content = '目前沒有該角色的資料！';
@@ -100,24 +100,37 @@ async function _getBag(senderId, messageContent){
   const bagRegax = /^(\/bag) ([\s\S]*) ([\s\S]*)$/;
   const teamName = bagRegax.exec(messageContent)[2];
   const target = bagRegax.exec(messageContent)[3];
+
   const team = await Database.fetchBag(teamName);
+  let teamFullName = await Database.fetchTeam(teamName);
+  teamFullName = teamFullName.full_name;
+
   let content = '';
   if(team){
-    content = '小隊' + team['name'] + '倉庫狀態：';
     if(target === "道具"){
-      content += '\n道具：';
+      content += `【道具包裹】${teamFullName}：`;
       const items = JSON.parse(team['items']);
       for(let i = 0; i < items.length; i++){
         const item = items[i];
-        content += `\n ${item['number']} ${item['name']} 品質${item['quality']} 使用次數${item['frequency']} ${item['type']}`;
+        content += `\n ${item.name}（${item.quality}，使用次数${item.frequency}，${item.type}）`;
       }
     }
     if(target === "素材"){
-      content += '\n素材：';
+      content += `【素材包裹】${teamFullName}：`;
       const materials = JSON.parse(team['materials']);
       for(let i = 0; i < materials.length; i++){
         const material = materials[i];
-        content += `\n ${material['number']} ${material['name']} ${material['color']} ${material['type']}`;
+        content += `\n ${material['number']}${material['name']} (${material['value']}${material['color']} ${material['type1']}`;
+        if(material['type2']){
+          content += `/${material['type2']}`;
+        }
+        if(material['type3']){
+          content += `/${material['type3']}`;
+        }
+        if(material['type4']){
+          content += `/${material['type4']}`;
+        }
+        content += `)`;
       }
     }
   }else{
@@ -195,6 +208,7 @@ async function _collect(senderId, messageContent){
     const item = totals[i];
     content += `${item.name}${item.number} `;
   }
+  console.log(JSON.stringify(totals));
   const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
   console.log(result);
 }
