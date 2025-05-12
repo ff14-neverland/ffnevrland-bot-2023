@@ -17,44 +17,46 @@ app.use(async ctx => {
   if(qqMessage){
       const messageContent = ctx.request.body.raw_message;
       const command = QQ.readCommand(messageContent);
-      const messageType = ctx.request.body.message_type;
+
+      let messageType = 'private';
       const userId = ctx.request.body.user_id;
       let senderId = userId;
       //如果發送者為群，將senderId設為group_id
       if(ctx.request.body.group_id){
           senderId = ctx.request.body.group_id;
+          messageType = 'group';
       }
       switch(command){
       case 'help':
-        _getHelp(senderId);
+        _getHelp(senderId, messageType);
       break;
 
       case 'at':
-        _getChara(senderId, messageContent);
+        _getChara(senderId, messageContent, messageType);
       break;
 
       case 'bag':
-        _getBag(senderId, messageContent);
+        _getBag(senderId, messageContent, messageType);
       break;
 
       case 'pf':
-        _getFormula(senderId, messageContent);
+        _getFormula(senderId, messageContent, messageType);
       break;
       
       case 'lj':
-        _addItem(senderId, messageContent);
+        _addItem(senderId, messageContent, messageType);
       break;
 
       case 'roll':
-        _roll(senderId, messageContent);
+        _roll(senderId, messageContent, messageType);
       break;
 
       case 'cj':
-        _collect(senderId, messageContent);
+        _collect(senderId, messageContent, messageType);
       break;
 
       case 'choose':
-        _choose(senderId, messageContent);
+        _choose(senderId, messageContent, messageType);
       break;
     }
   }else{
@@ -65,21 +67,26 @@ app.use(async ctx => {
 console.log('Start at 2000 port.');
 app.listen(2000);
 
-async function _getHelp(senderId){
+async function _getHelp(senderId, messageType){
   let content = '目前指令：';
   content += '\n /at (角色名稱) 输出角色技能组、随身携带宝可梦、道具';
-  content += '\n /bag (小组编号) (道具/素材) 查询小组仓库。範例：/bag A 道具';
+  content += '\n /bag (小组编号) (道具/素材) 查询小组仓库。範例：/bag A 道具。在查询素材时数目众多容易刷屏，请移步骰子组或小窗使用，并且尽量减少查询次数。';
   content += '\n /pf (道具名稱) 查询并输出该道具的配方。範例：/pf 冰晶';
   content += '\n /cj (小组编号) (采集數量) 采集指定數量的素材。範例：/cj C 5';
   //content += '\n /cj (小组编号) (类型) (采集數量) 采集指定類型和數量的素材。範例：/cj C 植物 5';
   content += '\n /lj (小组编号) (道具)(品質) 調合指定品質的道具。範例：/lj C 冰晶b';
   content += '\n /roll (骰子數量)d(骰子面數) 擲骰功能。範例：1顆100面的骰子= 1d100';
-  content += '\n /choose (選項) 睡鼠老師，幫我選擇！格式範例：選項1|選項2。建議小窗使用。';
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  content += '\n /choose (選項) 睡鼠老師，幫我選擇！格式範例：選項1|選項2。';
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _getChara(senderId, messageContent){
+async function _getChara(senderId, messageContent, messageType){
   const atRegax = /^(\/at) ([\s\S]*)$/;
   const name = atRegax.exec(messageContent)[2];
   const chara = await Database.fetchChara(name);
@@ -101,11 +108,16 @@ async function _getChara(senderId, messageContent){
   }else{
     content = '目前沒有該角色的資料！';
   }
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _getBag(senderId, messageContent){
+async function _getBag(senderId, messageContent, messageType){
   const bagRegax = /^(\/bag) ([\s\S]*) ([\s\S]*)$/;
   const teamName = (bagRegax.exec(messageContent)[2]).toUpperCase();
   const target = bagRegax.exec(messageContent)[3];
@@ -145,11 +157,16 @@ async function _getBag(senderId, messageContent){
   }else{
     content = '目前沒有該小隊的資料！';
   }
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _collect(senderId, messageContent){
+async function _collect(senderId, messageContent, messageType){
   const cjRegax1 = /^(\/cj) ([a-zA-Z]) ([0-9]+)$/;
   const cjRegax2 = /^(\/cj) ([^0-9]) ([\u4e00-\u9fa5]*) ([0-9]+)$/;
   const totals = [];
@@ -188,8 +205,13 @@ async function _collect(senderId, messageContent){
       const item = totals[i];
       content += `${item.name}${item.number} `;
     }
-    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-    console.log(result);
+    if(messageType === 'group'){
+      const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+      console.log(result); 
+    }else{
+      const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+      console.log(result); 
+    }
     return;
   }
 
@@ -227,29 +249,40 @@ async function _collect(senderId, messageContent){
         const item = totals[i];
         content += `${item.name}${item.number} `;
       }
-      const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-      console.log(result);
+      if(messageType === 'group'){
+        const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+        console.log(result); 
+      }else{
+        const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+        console.log(result); 
+      }
   }
 }
 
-async function _getFormula(senderId, messageContent){
+async function _getFormula(senderId, messageContent, messageType){
   const formulaRegax = /^(\/pf) ([\s\S]*)$/;
   const itemName = formulaRegax.exec(messageContent)[2];
-  let formula = await Database.fetchFormula(itemName);
-  formula = formula.formula;
+  let item = await Database.fetchItem(itemName);
+  const formula = item.formula;
 
   let content = '';
-  if(formula){
-    content = `${itemName}的配方為： ${formula}`;
+  if(item){
+    content = `${itemName}\n配方： ${formula} \n`;
+    content += `${itemName}效果： ${item.effect}`;
   }else{
-    content = '目前沒有該配方的資料！';
+    content = '目前沒有該道具的資料！';
   }
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _addItem(senderId, messageContent){
-  const ljRegax = /^(\/lj) ([a-zA-Z]) ([\u4e00-\u9fa5]*)([a-zA-Z]) ([\s\S]*)$/;
+async function _addItem(senderId, messageContent, messageType){
+  const ljRegax = /^(\/lj) ([a-zA-Z]) ([\u4e00-\u9fa5]*)([a-zA-Z])+/;
 
   const teamName = (ljRegax.exec(messageContent)[2]).toUpperCase();
   const team = await Database.fetchTeam(teamName);
@@ -266,22 +299,32 @@ async function _addItem(senderId, messageContent){
 
   let content = '';
   content = `已新增品質${itemQuality}的${itemName}至${teamName}小隊倉庫。`;
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _roll(senderId, messageContent){
+async function _roll(senderId, messageContent, messageType){
   const rollRegax = /(\/roll) ([0-9]+)d([0-9]+)/;
   console.log(messageContent);
   const diceNumber = parseInt(rollRegax.exec(messageContent)[2]);
   const rollNumber = parseInt(rollRegax.exec(messageContent)[3]);
   const rollResult = Common.rollDice(diceNumber, rollNumber).toString();
   const content = diceNumber + 'd' + rollNumber + '擲骰結果：' + rollResult;
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _choose(senderId, messageContent){
+async function _choose(senderId, messageContent, messageType){
   const chooseRegax = /^(\/choose) ([\s\S]*)$/;
   const optionsString = chooseRegax.exec(messageContent)[2];
   const options = optionsString.split('|');
@@ -292,8 +335,13 @@ async function _choose(senderId, messageContent){
   }else{
     content = '格式不符合！';
   }
-  const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
 function unescapeHtml(str){
