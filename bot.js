@@ -73,7 +73,7 @@ async function _getHelp(senderId, messageType){
   content += '\n /bag (小组编号) (道具/素材) 查询小组仓库。範例：/bag A 道具。在查询素材时数目众多容易刷屏，请移步骰子组或小窗使用，并且尽量减少查询次数。';
   content += '\n /pf (道具名稱) 查询并输出该道具的配方。範例：/pf 冰晶';
   content += '\n /cj (小组编号) (采集數量) 采集指定數量的素材。範例：/cj C 5';
-  //content += '\n /cj (小组编号) (类型) (采集數量) 采集指定類型和數量的素材。範例：/cj C 植物 5';
+  content += '\n /cj (小组编号) (类型) (采集數量) 采集指定類型和數量的素材。範例：/cj C 植物 5';
   content += '\n /lj (小组编号) (道具)(品質) 調合指定品質的道具。範例：/lj C 冰晶b';
   content += '\n /roll (骰子數量)d(骰子面數) 擲骰功能。範例：1顆100面的骰子= 1d100';
   content += '\n /choose (選項) 睡鼠老師，幫我選擇！格式範例：選項1|選項2。';
@@ -268,7 +268,8 @@ async function _getFormula(senderId, messageContent, messageType){
   let content = '';
   if(item){
     content = `${itemName}\n配方： ${formula} \n`;
-    content += `${itemName}效果： ${item.effect}`;
+    content += `效果： ${item.effect}\n`;
+    content += `品質等級： ${item.able_quality}`;
   }else{
     content = '目前沒有該道具的資料！';
   }
