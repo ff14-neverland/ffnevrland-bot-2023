@@ -17,40 +17,41 @@ app.use(async ctx => {
   if(qqMessage){
       const messageContent = ctx.request.body.raw_message;
       const command = QQ.readCommand(messageContent);
-      const messageType = ctx.request.body.message_type;
+      let messageType = 'private';
       const userId = ctx.request.body.user_id;
       let senderId = userId;
       //如果發送者為群，將senderId設為group_id
       if(ctx.request.body.group_id){
           senderId = ctx.request.body.group_id;
+          messageType = 'group';
       }
       switch(command){
       case 'latest':
-        _getLatest(senderId);
+        _getLatest(senderId, messageType);
       break;
 
       case 'help':
-        _getHelp(senderId);
+        _getHelp(senderId, messageType);
       break;
 
       case 'count':
-        _getCount(senderId, userId, messageContent);
+        _getCount(senderId, userId, messageContent, messageType);
       break;
 
       case 'who':
-        _getWho(senderId, messageContent);
+        _getWho(senderId, messageContent, messageType);
       break;
 
       case 'roll':
-        _roll(senderId, messageContent);
+        _roll(senderId, messageContent, messageType);
       break;
 
       case 'items':
-        _getItems(senderId, userId, messageContent);
+        _getItems(senderId, userId, messageContent, messageType);
       break;
 
       case 'choose':
-        _choose(senderId, messageContent);
+        _choose(senderId, messageContent, messageType);
       break;
 
       case 'admin':
@@ -86,7 +87,7 @@ async function _getLatest(senderId){
   console.log(result);
 }
 
-async function _getHelp(senderId){
+async function _getHelp(senderId, messageType){
   let content = '目前指令：';
   content += '\n /latest 查看Neverland 最新五篇文章';
   content += '\n /who (角色名) 獲得角色卡連結';
@@ -97,11 +98,17 @@ async function _getHelp(senderId){
   content += '\n /itemRecord (道具)(價錢) 道具記錄功能。範例：/itemRecord 道具名 500';
   content += '\n /deleteItem (道具) 刪除已擁有的道具。範例：/deleteItem 道具名，請小心使用！';
   content += '\n /draw 自動抽卡機。需要消耗字數。範例：/draw，十連抽則為 /draw 十连';
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _getCount(senderId, userId, messageContent){
+
+async function _getCount(senderId, userId, messageContent, messageType){
   const nameRegax = /(\/count) ([\s\S]*)/;
   let name = nameRegax.exec(messageContent);
   let chara = null;
@@ -122,7 +129,13 @@ async function _getCount(senderId, userId, messageContent){
     }
   }
   if(!chara){
-    await QQ.sendMessage(senderId, '找不到此角色！', config);
+    if(messageType === 'group'){
+      const result = await QQ.sendMessage(senderId, "找不到角色！", config);
+      console.log(result); 
+    }else{
+      const result = await QQ.sendPrivateMessage(senderId, "找不到角色！", config);
+      console.log(result); 
+    }
     return;
   }
   let content = '';
@@ -134,16 +147,27 @@ async function _getCount(senderId, userId, messageContent){
   }else{
     content = '目前沒有該角色的統計資料！';
   }
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _getWho(senderId, messageContent){
+async function _getWho(senderId, messageContent, messageType){
   const nameRegax = /(\/who) ([\s\S]*)/;
   const name = nameRegax.exec(messageContent)[2];
   const charas = await Wordpress.fetchChara(config, name);
   if(!charas){
-    await QQ.sendMessage(senderId, '找不到此角色！', config);
+    if(messageType === 'group'){
+      const result = await QQ.sendMessage(senderId, "找不到角色！", config);
+      console.log(result); 
+    }else{
+      const result = await QQ.sendPrivateMessage(senderId, "找不到角色！", config);
+      console.log(result); 
+    }
     return;
   }
   let content = '角色名：';
@@ -154,22 +178,32 @@ async function _getWho(senderId, messageContent){
     content += '\n' + chara['link'];
     content += '\n';
   }
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _roll(senderId, messageContent){
+async function _roll(senderId, messageContent, messageType){
   const rollRegax = /(\/roll) ([0-9]+)d([0-9]+)/;
   console.log(messageContent);
   const diceNumber = parseInt(rollRegax.exec(messageContent)[2]);
   const rollNumber = parseInt(rollRegax.exec(messageContent)[3]);
   const rollResult = Common.rollDice(diceNumber, rollNumber).toString();
   const content = diceNumber + 'd' + rollNumber + '擲骰結果：' + rollResult;
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _choose(senderId, messageContent){
+async function _choose(senderId, messageContent, messageType){
   const chooseRegax = /^(\/choose) ([\s\S]*)$/;
   const optionsString = chooseRegax.exec(messageContent)[2];
   const options = optionsString.split('|');
@@ -180,11 +214,16 @@ async function _choose(senderId, messageContent){
   }else{
     content = '格式不符合！';
   }
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
-async function _getItems(senderId, userId, messageContent){
+async function _getItems(senderId, userId, messageContent, messageType){
   const nameRegax = /(\/items) ([\s\S]*)/;
   let name = nameRegax.exec(messageContent);
   let chara = null;
@@ -238,8 +277,13 @@ async function _getItems(senderId, userId, messageContent){
   }else{
     content = '目前沒有該角色的道具資料！';
   }
-  const result = await QQ.sendMessage(senderId, content, config);
-  console.log(result);
+  if(messageType === 'group'){
+    const result = await QQ.sendMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }else{
+    const result = await QQ.sendPrivateMessage(senderId, unescapeHtml(content), config);
+    console.log(result); 
+  }
 }
 
 async function _draw(senderId, userId, messageContent){
@@ -325,4 +369,21 @@ async function _deleteItem(senderId, userId, messageContent){
     content = '找不到此道具，無法刪除';
   }
   await QQ.sendMessage(senderId, content, config);
+}
+
+function unescapeHtml(str){
+  if (typeof str !== 'string') return str;
+
+	var patterns = {
+		'&lt;'   : '<',
+		'&gt;'   : '>',
+		'&amp;'  : '&',
+		'&quot;' : '"',
+		'&#x27;' : '\'',
+		'&#x60;' : '`'
+	};
+
+	return str.replace(/&(lt|gt|amp|quot|#x27|#x60);/g, function(match) {
+		return patterns[match];
+	});
 }
