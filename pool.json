@@ -51,48 +51,53 @@
       "type": "九宫幻卡"
     },
     {
-      "name": "玛那碎片x2",
+      "name": "方舟碎片x2",
       "number": "5",
       "type": "道具"
     },
     {
-      "name": "玛那碎片x3",
+      "name": "方舟碎片x3",
       "number": "5",
       "type": "道具"
     },
     {
-      "name": "玛那碎片x4",
+      "name": "方舟碎片x4",
       "number": "5",
       "type": "道具"
     },
     {
-      "name": "玛那碎片x5",
+      "name": "方舟碎片x5",
       "number": "5",
       "type": "道具"
     },
     {
-      "name": "冰花舞狐",
-      "number": "6",
+      "name": "迷你龍門巴士",
+      "number": "5",
       "type": "寵物"
     },
     {
-      "name": "奶猫和牛猫",
-      "number": "6",
+      "name": "小狼之主(黑)",
+      "number": "5",
       "type": "寵物"
     },
     {
-      "name": "星之实",
-      "number": "6",
+      "name": "小狼之主(白)",
+      "number": "5",
       "type": "寵物"
     },
     {
-      "name": "智能猫球“G”",
-      "number": "6",
+      "name": "艺术的化身",
+      "number": "5",
       "type": "寵物"
     },
     {
-      "name": "小归人作业团",
-      "number": "6",
+      "name": "DJ企鵝王子",
+      "number": "5",
+      "type": "寵物"
+    },
+    {
+      "name": "塔式管弦乐琴",
+      "number": "5",
       "type": "寵物"
     }
   ]
